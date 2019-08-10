@@ -13,8 +13,6 @@ import (
 func main() {
 	a := os.Args
 
-	fmt.Printf("%v", a)
-
 	if len(a) != 2 {
 		fmt.Println("You must specify an argument for the battle's field square side")
 		os.Exit(1)
@@ -31,47 +29,22 @@ func main() {
 	g := ttt.NewGame(n)
 	p := g.GetPlayers()
 
-	fmt.Printf("The game schema:\n")
+	e = clearTerminal()
 
-	for i, c := range g.GetCellsWithEmptyValue() {
-		if i%n == 0 {
-			fmt.Print("\n")
-		}
-
-		fmt.Printf("%v", c)
+	if e != nil {
+		fmt.Printf("\nTerminal clear not supported\n")
 	}
-
-	fmt.Print("\n\n")
 
 	for {
 		for i := range p {
-			var e error
+			_ = clearTerminal() // Not important for the game
 
-			cmd := exec.Command("clear")
-			cmd.Stdout = os.Stdout
-			e = cmd.Run()
+			printBattleField(g.GetBattleField())
 
-			if e != nil {
-				fmt.Printf("\nTerminal clear not supported\n")
+			if wp, w := g.GetWinner(); w {
+				fmt.Printf("'%v' is the winner\n", string(wp.GetSymbol()))
+				os.Exit(1)
 			}
-
-			for _, r := range g.GetBattleField() {
-				for _, rc := range r {
-					if rc == 0 {
-						fmt.Printf("-")
-					} else {
-						fmt.Printf("%v", string(rc))
-					}
-
-					fmt.Printf(" ")
-				}
-
-				fmt.Print("\n")
-			}
-
-			fmt.Print("\n")
-
-			reader := bufio.NewReader(os.Stdin)
 			ec := g.GetCellsWithEmptyValue()
 
 			if len(ec) == 0 {
@@ -85,6 +58,7 @@ func main() {
 				fmt.Printf("%d) %v\n", j, c)
 			}
 
+			reader := bufio.NewReader(os.Stdin)
 			b, e := reader.ReadByte()
 
 			if e != nil {
@@ -105,11 +79,32 @@ func main() {
 				fmt.Printf("'Impossible add game '%v' turn for '%v' player\n", ec[j], string(p[i].GetSymbol()))
 				os.Exit(1)
 			}
-
-			if wp, w := g.GetWinner(); w {
-				fmt.Printf("'%v' is the winner\n", string(wp.GetSymbol()))
-				os.Exit(1)
-			}
 		}
 	}
+}
+
+func printBattleField(bt [][]byte) {
+	fmt.Printf("\n")
+
+	for _, r := range bt {
+		for _, rc := range r {
+			if rc == 0 {
+				fmt.Printf("-")
+			} else {
+				fmt.Printf("%v", string(rc))
+			}
+
+			fmt.Printf(" ")
+		}
+
+		fmt.Printf("\n")
+	}
+
+	fmt.Printf("\n")
+}
+
+func clearTerminal() error {
+	cmd := exec.Command("clear")
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
 }
