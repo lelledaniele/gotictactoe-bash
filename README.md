@@ -1,6 +1,6 @@
 # Tic Tac Toe in Go
 
-This small project is an example of how you can use my module [gotictactoe](github.com/lelledaniele/gotictactoe).
+This small project is an example of how you can use my module [gotictactoe](https://github.com/lelledaniele/gotictactoe).
 
 It was fun to develop Tic Tac Toe.
 However, I will stop to improve this package, and I will concentrate on other projects to learn Golang.
