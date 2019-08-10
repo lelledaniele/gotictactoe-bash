@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 
 	ttt "github.com/lelledaniele/gotictactoe"
@@ -44,6 +45,32 @@ func main() {
 
 	for {
 		for i := range p {
+			var e error
+
+			cmd := exec.Command("clear")
+			cmd.Stdout = os.Stdout
+			e = cmd.Run()
+
+			if e != nil {
+				fmt.Printf("\nTerminal clear not supported\n")
+			}
+
+			for _, r := range g.GetBattleField() {
+				for _, rc := range r {
+					if rc == 0 {
+						fmt.Printf("-")
+					} else {
+						fmt.Printf("%v", string(rc))
+					}
+
+					fmt.Printf(" ")
+				}
+
+				fmt.Print("\n")
+			}
+
+			fmt.Print("\n")
+
 			reader := bufio.NewReader(os.Stdin)
 			ec := g.GetCellsWithEmptyValue()
 
@@ -72,25 +99,12 @@ func main() {
 				os.Exit(1)
 			}
 
-			g.AddTurn(ec[j], p[i].GetSymbol())
+			e = g.AddTurn(ec[j], p[i].GetSymbol())
 
-			fmt.Print("\n")
-
-			for _, r := range g.GetBattleField() {
-				for _, rc := range r {
-					if rc == 0 {
-						fmt.Printf("-")
-					} else {
-						fmt.Printf("%v", string(rc))
-					}
-
-					fmt.Printf(" ")
-				}
-
-				fmt.Print("\n")
+			if e != nil {
+				fmt.Printf("'Impossible add game '%v' turn for '%v' player\n", ec[j], string(p[i].GetSymbol()))
+				os.Exit(1)
 			}
-
-			fmt.Print("\n")
 
 			if wp, w := g.GetWinner(); w {
 				fmt.Printf("'%v' is the winner\n", string(wp.GetSymbol()))
